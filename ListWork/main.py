@@ -30,8 +30,6 @@ def remove(y, *args):
             elif arg in x: 
                 x.remove(arg)
 
-
-
 def show_list():
     lineWidth = len("".join(x)) + len(x)*4
     #print(lineWidth) #Delete this line, its only for debugging
