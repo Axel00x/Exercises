@@ -1,7 +1,11 @@
 #Created by Alessandro (Axel00x)
+from Snippets.textSnip import *
+from datetime import datetime
+import os 
 
 x = ["BMW", "Mercedes", "Audi"]
 
+previous_x_value = []
 
 add_prefix = ["+", "1"]
 remove_prefix = ["-", "2"]
@@ -9,15 +13,18 @@ remove_prefix = ["-", "2"]
 lineWidth = 27
 
 def add(y, *args):
+    global previous_x_value
     y = y.strip().replace(" ", "")
+    previous_x_value = x[:]
     if y:
         try:
             x.insert(int(args[0]), y)
         except:
             x.append(y)
-    
 
 def remove(y, *args):
+    global previous_x_value
+    previous_x_value = x[:]
     if y in x:
         x.remove(y)
     elif str(y) in map(str, range(len(x))):
@@ -33,8 +40,8 @@ def remove(y, *args):
 def show_list():
     lineWidth = len("".join(x)) + len(x)*4
     #print(lineWidth) #Delete this line, its only for debugging
-    if lineWidth > 170:
-        lineWidth = 170
+    if lineWidth > 160:
+        lineWidth = 160
     elif lineWidth < 0:
         lineWidth = 0
         
@@ -57,6 +64,8 @@ def show_list():
         add_request()
     elif response in remove_prefix:
         remove_request()
+    else:
+        print_error(err_types[1])
 
 
 def add_request():
@@ -66,13 +75,35 @@ def add_request():
     add(userInp, n)
     
 def remove_request():
-    userInp = input("Wich item do you want to remove? (write the obj/name/index) " ).replace(" ", "").split(",")
+    userInp = input("Wich item do you want to remove? (write the obj/name/index) " ).replace(" ", "").split(",")   
     
     remove(*userInp)
+    
+#-------------         S Y S T E M         -------------    
 
-print("\033[1;31mPress Ctrl + C to end task\033[0m")
+err_types = ["no items added/removed", "invalid syntax", "unknown error"]
+
+def cls():
+    os.system('cls' if os.name=='nt' else 'clear')
+
+def print_error(type=err_types[len(err_types)-1]):
+        print("")
+        print(datetime.now().strftime("%H:%M:%S")+"  ", end="")
+        warn("Error: ", True) 
+        print(type)
+        print("")
+        input("Press Enter to continue...")
+        
 while True:
-    show_list()
+    try:
+        cls() #clear console
+        warn("Press Ctrl + C to end task")
+        show_list()
+        if previous_x_value[:] == x[:]:
+            print_error(err_types[0])
+    except:
+        print_error()
+
 
 # \033[0m       ---   Default
 # \033[1;31m    ---   Rosso
