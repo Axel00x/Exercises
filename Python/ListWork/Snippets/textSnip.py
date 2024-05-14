@@ -1,5 +1,7 @@
+from datetime import datetime
+
 def warn(message, end=False):
     if end==True:
-        print("\033[1;31m"+message+"\033[0m", end="")
+        print(datetime.now().strftime("%H:%M:%S")+"  "+"\033[1;31m"+message+"\033[0m", end="")
     else:
-        print("\033[1;31m"+message+"\033[0m")
+        print(datetime.now().strftime("%H:%M:%S")+"  "+"\033[1;31m"+message+"\033[0m")

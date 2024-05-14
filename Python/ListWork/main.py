@@ -6,9 +6,11 @@ import os
 x = ["BMW", "Mercedes", "Audi"]
 
 previous_x_value = []
+previous_y_value = []
 
 add_prefix = ["+", "1"]
 remove_prefix = ["-", "2"]
+move_prefix = ["->", "3"]
 
 lineWidth = 27
 
@@ -37,6 +39,24 @@ def remove(y, *args):
             elif arg in x: 
                 x.remove(arg)
 
+def move(y, pos=int(len(x)-1)):
+    global previous_x_value, previous_y_value
+    previous_x_value = x[:]
+    
+    if str(y) == str(pos):
+        print_error(err_types[2])
+    
+    if y in x:
+        previous_y_value = y
+        x.pop(x.index(y))
+        x.insert(int(pos), y)
+    elif str(y) in map(str, range(len(x))):
+        previous_y_value = x[int(y)]
+        x.pop(int(y))
+        x.insert(int(pos), previous_y_value)
+    elif str(y) == str(pos):
+        print_error(err_types[2])
+
 def show_list():
     lineWidth = len("".join(x)) + len(x)*4
     #print(lineWidth) #Delete this line, its only for debugging
@@ -64,36 +84,42 @@ def show_list():
         add_request()
     elif response in remove_prefix:
         remove_request()
+    elif response in move_prefix:
+        move_request()
     else:
         print_error(err_types[1])
 
 
 def add_request():
-    userInp = input("Wich item do you want to add? (write the obj/name) ")
+    userInp = input("Which item do you want to add? (write the obj/name) ")
     n = input("Specific position in the list? (insert the index 1,2,3...) \033[1;31m[OPTIONAL]\033[0m ")
     
     add(userInp, n)
     
 def remove_request():
-    userInp = input("Wich item do you want to remove? (write the obj/name/index) " ).replace(" ", "").split(",")   
+    userInp = input("Which item do you want to remove? (write the obj/name/index) " ).replace(" ", "").split(",")   
     
     remove(*userInp)
     
+def move_request():
+    userInp = input('Which item do you want to move? [obj/name/index] to [index] ').split()
+    
+    move(*userInp)
 #-------------         S Y S T E M         -------------    
 
-err_types = ["no items added/removed", "invalid syntax", "unknown error"]
+err_types = ["no items added/removed", "invalid syntax", "values must be different", "unknown error"]
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
 
 def print_error(type=err_types[len(err_types)-1]):
         print("")
-        print(datetime.now().strftime("%H:%M:%S")+"  ", end="")
         warn("Error: ", True) 
         print(type)
         print("")
         input("Press Enter to continue...")
-        
+
+'''    
 while True:
     try:
         cls() #clear console
@@ -103,6 +129,16 @@ while True:
             print_error(err_types[0])
     except:
         print_error()
+'''     
+while True:
+
+    cls() #clear console
+    warn("Press Ctrl + C to end task")
+    show_list()
+    if previous_x_value[:] == x[:]:
+        print_error(err_types[0])
+        
+    #print_error()
 
 
 # \033[0m       ---   Default
