@@ -11,6 +11,7 @@ previous_y_value = []
 add_prefix = ["+", "1"]
 remove_prefix = ["-", "2"]
 move_prefix = ["->", "3"]
+rename_prefix = ["r", "4"]
 
 lineWidth = 27
 
@@ -56,6 +57,12 @@ def move(y, pos=int(len(x)-1)):
         x.insert(int(pos), previous_y_value)
     elif str(y) == str(pos):
         print_error(err_types[2])
+        
+def rename(y, name):
+    if y in x:
+        x[x.index(y)] = name
+    elif str(y) in map(str, range(len(x))):
+        x[int(y)] = name
 
 def show_list():
     lineWidth = len("".join(x)) + len(x)*4
@@ -77,6 +84,8 @@ def show_list():
     
     print(f"\033[1;32m{add_prefix[0]}\033[0m or \033[1;32m{add_prefix[1]}\033[0m to \033[1;37madd\033[0m an item.")
     print(f"\033[1;32m{remove_prefix[0]}\033[0m or \033[1;32m{remove_prefix[1]}\033[0m to \033[1;37mremove\033[0m an item.")
+    print(f"\033[1;32m{move_prefix[0]}\033[0m or \033[1;32m{move_prefix[1]}\033[0m to \033[1;37mmove\033[0m an item.")
+    print(f"\033[1;32m{rename_prefix[0]}\033[0m or \033[1;32m{rename_prefix[1]}\033[0m to \033[1;37mrename\033[0m an item.")
     print("")
     
     response = input()
@@ -86,6 +95,8 @@ def show_list():
         remove_request()
     elif response in move_prefix:
         move_request()
+    elif response in rename_prefix:
+        rename_request()
     else:
         print_error(err_types[1])
 
@@ -105,6 +116,11 @@ def move_request():
     userInp = input('Which item do you want to move? [obj/name/index] to [index] ').split()
     
     move(*userInp)
+
+def rename_request():
+    userInp = input('Which item do you want to rename? [obj/name/index] to [obj/name] ').split()
+    
+    rename(*userInp)
 #-------------         S Y S T E M         -------------    
 
 err_types = ["no items added/removed", "invalid syntax", "values must be different", "unknown error"]
@@ -114,7 +130,7 @@ def cls():
 
 def print_error(type=err_types[len(err_types)-1]):
         print("")
-        warn("Error: ", True) 
+        warn("Error: ", True, True) 
         print(type)
         print("")
         input("Press Enter to continue...")
@@ -133,7 +149,7 @@ while True:
 while True:
 
     cls() #clear console
-    warn("Press Ctrl + C to end task")
+    warn("Press Ctrl + C to end task", False, False)
     show_list()
     if previous_x_value[:] == x[:]:
         print_error(err_types[0])
