@@ -1,6 +1,7 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Imposta il livello di log a 2 (solo errori)
 
+from deepface import DeepFace
 import cv2, time, asyncio
 import face_recognition
 import mediapipe as mp
@@ -17,6 +18,8 @@ def eye_aspect_ratio(eye):
     return ear
 
 cap = cv2.VideoCapture(0)
+
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands()
@@ -35,68 +38,53 @@ while True:
     ret, frame = cap.read()
     if not ret:
         break
+    
+    
+    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    rgb_frame = cv2.cvtColor(gray_frame, cv2.COLOR_GRAY2RGB)
 
     small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
     rgb_small_frame = small_frame[:, :, ::-1]
     face_locations = face_recognition.face_locations(rgb_small_frame)
     face_landmarks_list = face_recognition.face_landmarks(rgb_small_frame)
 
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = hands.process(rgb_frame)
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    async def sleep1():
+    async def clear_console():
         await asyncio.sleep(0.2)
         os.system('cls' if os.name=='nt' else 'clear')
 
     # Rilevamento delle espressioni facciali con dlib
     faces = detector(gray)
-    for face in faces:
-        shape = predictor(gray, face)
-        shape = face_utils.shape_to_np(shape)
+    # Convert frame to grayscale
+    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        # Definisci le soglie per le diverse espressioni facciali
-        EYE_AR_THRESH = 0.25
-        MOUTH_AR_THRESH = 0.4
-        EYEBROW_DIST_THRESH = 95
+    # Convert grayscale frame to RGB format
+    rgb_frame = cv2.cvtColor(gray_frame, cv2.COLOR_GRAY2RGB)
+
+    # Detect faces in the frame
+    faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+    for (x, y, w, h) in faces:
+        # Extract the face ROI (Region of Interest)
+        face_roi = rgb_frame[y:y + h, x:x + w]
+
         
-        left_eye = shape[36:42]
-        right_eye = shape[42:48]
-        mouth = shape[48:68]
-        eyebrows = shape[17:27]
+        # Perform emotion analysis on the face ROI
+        result = DeepFace.analyze(face_roi, actions=['emotion'], enforce_detection=False)
 
-        # Calcola l'indice delle espressioni facciali
-        eye_aspect_ratio_left = eye_aspect_ratio(left_eye)
-        eye_aspect_ratio_right = eye_aspect_ratio(right_eye)
-        mouth_aspect_ratio = (dist.euclidean(mouth[2], mouth[10]) + dist.euclidean(mouth[4], mouth[8])) / (2 * dist.euclidean(mouth[0], mouth[6]))
-        eyebrow_distance = dist.euclidean(eyebrows[1], eyebrows[4])
+        # Determine the dominant emotion
+        emotion = result[0]['dominant_emotion']
 
-        # Determina l'espressione facciale corrente
-        expression = "Neutro"
-        if eye_aspect_ratio_left < EYE_AR_THRESH and eye_aspect_ratio_right < EYE_AR_THRESH:
-            expression = "Occhi Chiusi"
-        elif mouth_aspect_ratio > MOUTH_AR_THRESH:
-            if eyebrow_distance > EYEBROW_DIST_THRESH:
-                expression = "Sorriso aperto"
-            else:
-                expression = "Sorride"
-        elif eyebrow_distance > EYEBROW_DIST_THRESH:
-            expression = "Sorpresa"
-        elif mouth_aspect_ratio < 0.3:
-            expression = "Tristezza"
-            
-        # Stampa le informazioni e pulisci lo schermo
-        print("Expression:", expression)
-        print("Eye Aspect Ratio Left:", eye_aspect_ratio_left)
-        print("Eye Aspect Ratio Right:", eye_aspect_ratio_right)
-        print("Mouth Aspect Ratio:", mouth_aspect_ratio)
-        print("Eyebrow Distance:", eyebrow_distance)
-        asyncio.run(sleep1())
-        
-        # Visualizza l'espressione facciale sul frame
-        cv2.putText(frame, expression, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+        # Draw rectangle around face and label with predicted emotion
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        cv2.putText(frame, emotion, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
 
+    # Display the resulting frame
+    #cv2.imshow('Real-time Emotion Detection', frame)
+    
     for (top, right, bottom, left), face_landmarks in zip(face_locations, face_landmarks_list):
         top *= 4
         right *= 4
