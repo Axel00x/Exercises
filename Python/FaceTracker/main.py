@@ -30,7 +30,6 @@ face_detection = mp_face_detection.FaceDetection(min_detection_confidence=0.5)
 
 EYE_AR_THRESH = 0.25
 
-# Carica il rilevatore delle espressioni facciali
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(r'C:\Users\Acer\OneDrive\Desktop\Programmazione\Esercizi\Python\FaceTracker\shape_predictor_68_face_landmarks.dat')
 
@@ -56,7 +55,6 @@ while True:
         await asyncio.sleep(0.2)
         os.system('cls' if os.name=='nt' else 'clear')
 
-    # Rilevamento delle espressioni facciali con dlib
     faces = detector(gray)
     # Convert frame to grayscale
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -110,7 +108,6 @@ while True:
         else:
             cv2.putText(frame, "Occhi Aperti", (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-        # Disegna il rig per il naso, gli occhi, la bocca e le sopracciglia
         for point in left_eye:
             point = (point[0] * 4, point[1] * 4)
             cv2.circle(frame, point, 2, (255, 0, 0), -1)
