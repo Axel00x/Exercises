@@ -18,4 +18,4 @@ Contributions to this repository are welcome! If you have an exercise you would 
 
 ## License
 
-This project is licensed under the MIT License.
+Nothing yet.
