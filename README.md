@@ -19,3 +19,4 @@ Contributions to this repository are welcome! If you have an exercise you would 
 ## License
 
 MIT license.
+Read (LICENSE)[https://github.com/Axel00x/Exercises/blob/main/LICENSE] for more info.
