@@ -18,4 +18,4 @@ Contributions to this repository are welcome! If you have an exercise you would 
 
 ## License
 
-Nothing yet.
+MIT license.
